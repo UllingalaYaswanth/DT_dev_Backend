@@ -14,10 +14,9 @@ const mongoURI = 'mongodb+srv://sruthi:test@test.vo8k0.mongodb.net/';
 // Middleware
 // app.use(cors());
 app.use(cors({
-  origin: 'https://dt.intelliod.com/', // Replace with your Amplify app URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Define allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'],  // Define allowed headers
+  origin: '*',  // Allows all origins, but not recommended for production
 }));
+
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
