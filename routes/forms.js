@@ -5,7 +5,7 @@ import multerS3 from 'multer-s3';
 import dotenv from 'dotenv';
 import Form from '../models/Form.js';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
-
+import AntennaLayout from '../models/AntennaLayout.js';
 dotenv.config();
 
 // AWS S3 Configuration
@@ -138,4 +138,127 @@ router.get('/ins-get', async (req, res) => {
     res.status(500).json({ message: 'Error fetching form data', error });
   }
 });
+
+router.post('/submit', upload.single('image'), async (req, res) => {
+  console.log("Received request:", req.body);
+  
+  try {
+      const antennaData = new AntennaLayout({
+          siteId: req.body.siteId,
+          reportVersion: req.body.reportVersion,
+          scanDate: req.body.scanDate,
+          mountLevel: req.body.mountLevel,
+          noOperators: req.body.operators,
+          location: req.body.location,
+          AntennaLayouta2: {
+              radCenter: String(req.body.a2RadCenter),
+              azimuth: String(req.body.a2Azimuth),
+              mechTilt: String(req.body.a2MechTilt),
+          },
+          AntennaLayoutb2: {
+              radCenter: String(req.body.b2RadCenter),
+              azimuth: String(req.body.b2Azimuth),
+              mechTilt: String(req.body.b2MechTilt),
+          },
+          AntennaLayoutc2: {
+              radCenter: String(req.body.c2RadCenter),
+              azimuth: String(req.body.c2Azimuth),
+              mechTilt: String(req.body.c2MechTilt),
+          },
+          image: req.file ? req.file.buffer : null,
+          a2Swing: {
+              radCenter: String(req.body.a2SwingRadCenter),
+              azimuth: String(req.body.a2SwingAzimuth),
+              mechTilt: String(req.body.a2SwingMechTilt),
+              skew: String(req.body.a2SwingSkew),
+              antSwingAngleNeg: String(req.body.a2SwingAntSwingAngleNeg),
+              antSwingAnglePos: String(req.body.a2SwingAntSwingAnglePos),
+          },
+          b2Swing: {
+              radCenter: String(req.body.b2SwingRadCenter),
+              azimuth: String(req.body.b2SwingAzimuth),
+              mechTilt: String(req.body.b2SwingMechTilt),
+              skew: String(req.body.b2SwingSkew),
+              antSwingAngleNeg: String(req.body.b2SwingAntSwingAngleNeg),
+              antSwingAnglePos: String(req.body.b2SwingAntSwingAnglePos),
+          },
+          c2Swing: {
+              radCenter: String(req.body.c2SwingRadCenter),
+              azimuth: String(req.body.c2SwingAzimuth),
+              mechTilt: String(req.body.c2SwingMechTilt),
+              skew: String(req.body.c2SwingSkew),
+              antSwingAngleNeg: String(req.body.c2SwingAntSwingAngleNeg),
+              antSwingAnglePos: String(req.body.c2SwingAntSwingAnglePos),
+          },
+          mounts: {
+              sectorA: {
+                  memberSchedule: {
+                      p1Size: String(req.body.sectorAP1Size),
+                      p1Length: String(req.body.sectorAP1Length),
+                      p2Size: String(req.body.sectorAP2Size),
+                      p2Length: String(req.body.sectorAP2Length),
+                  },
+                  dimensions: {
+                      A: String(req.body.sectorADimA || ''),
+                      B: String(req.body.sectorADimB || ''),
+                      C: String(req.body.sectorADimC || ''),
+                      D: String(req.body.sectorADimD || ''),
+                      E: String(req.body.sectorADimE || ''),
+                      F: String(req.body.sectorADimF || ''),
+                  }
+              },
+              sectorB: {
+                  memberSchedule: {
+                      p1Size: String(req.body.sectorBP1Size),
+                      p1Length: String(req.body.sectorBP1Length),
+                      p2Size: String(req.body.sectorBP2Size),
+                      p2Length: String(req.body.sectorBP2Length),
+                  },
+                  dimensions: {
+                      A: String(req.body.sectorBDimA || ''),
+                      B: String(req.body.sectorBDimB || ''),
+                      C: String(req.body.sectorBDimC || ''),
+                      D: String(req.body.sectorBDimD || ''),
+                      E: String(req.body.sectorBDimE || ''),
+                      F: String(req.body.sectorBDimF || ''),
+                  }
+              },
+              sectorC: {
+                  memberSchedule: {
+                      p1Size: String(req.body.sectorCP1Size),
+                      p1Length: String(req.body.sectorCP1Length),
+                      p2Size: String(req.body.sectorCP2Size),
+                      p2Length: String(req.body.sectorCP2Length),
+                  },
+                  dimensions: {
+                      A: String(req.body.sectorCDimA || ''),
+                      B: String(req.body.sectorCDimB || ''),
+                      C: String(req.body.sectorCDimC || ''),
+                      D: String(req.body.sectorCDimD || ''),
+                      E: String(req.body.sectorCDimE || ''),
+                      F: String(req.body.sectorCDimF || ''),
+                  }
+              }
+          }
+      });
+
+      await antennaData.save();
+      res.status(200).json({ message: 'Data saved successfully.' });
+  } catch (error) {
+      console.error('Error saving data:', error);
+      res.status(500).json({ message: 'Error saving data', error: error.message });
+  }
+});
+
+router.get('/antenna-layouts', async (req, res) => {
+  try {
+      const antennaLayouts = await AntennaLayout.find({});
+      res.json(antennaLayouts);
+  } catch (error) {
+      console.error("Error fetching antenna layouts:", error);
+      res.status(500).json({ message: 'Failed to fetch antenna layouts.' });
+  }
+});
+
+
 export default router;
