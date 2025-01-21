@@ -141,6 +141,7 @@ const operatorSchema = new mongoose.Schema({
 
 const formSchema = new mongoose.Schema({
   siteID: String,
+  siteImagePath: String,
   operators: [operatorSchema]
 });
 

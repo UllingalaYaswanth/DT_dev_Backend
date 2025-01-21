@@ -43,9 +43,12 @@ const upload = multer({
 // Create router for form-related API
 const router = express.Router();
 
+
+
 router.post('/ins-submit', upload.fields([
   { name: 'azimuthAnglesImages', maxCount: 3 },
   { name: 'annotationsImages', maxCount: 4 },
+  { name: 'siteImage', maxCount: 1 }, // Add a field for site image
 ]), async (req, res) => {
   try {
     const formData = req.body;
@@ -64,9 +67,9 @@ router.post('/ins-submit', upload.fields([
     }
 
     // Ensure that azimuthAngles exists in the operators object
-    const operator = formData.operators;  // operators is an object, not an array
+    const operator = formData.operators; // operators is an object, not an array
     if (!operator.azimuthAngles) {
-      operator.azimuthAngles = [];  // Initialize as empty array if undefined
+      operator.azimuthAngles = []; // Initialize as empty array if undefined
     }
 
     // Process azimuthAnglesImages if any are uploaded
@@ -78,9 +81,9 @@ router.post('/ins-submit', upload.fields([
         const angleData = operator.azimuthAngles[index] || {};
 
         return {
-          angle: angleData.angle || 'Unknown',  // If no angle data, default to 'Unknown'
-          details: angleData.details || 'Unknown',  // If no details, default to 'Unknown'
-          imagePath: file.location,  // AWS S3 URL
+          angle: angleData.angle || 'Unknown', // If no angle data, default to 'Unknown'
+          details: angleData.details || 'Unknown', // If no details, default to 'Unknown'
+          imagePath: file.location, // AWS S3 URL
         };
       });
     }
@@ -91,10 +94,17 @@ router.post('/ins-submit', upload.fields([
 
       operator.annotations = req.files.annotationsImages.map((file) => {
         return {
-          image: file.originalname,  // Use original file name
-          imagePath: file.location,  // AWS S3 URL
+          image: file.originalname, // Use original file name
+          imagePath: file.location, // AWS S3 URL
         };
       });
+    }
+
+    // Process siteImage if uploaded
+    if (req.files?.siteImage?.length > 0) {
+      console.log('Site image uploaded:', req.files.siteImage[0]);
+
+      formData.siteImagePath = req.files.siteImage[0].location; // Store the AWS S3 URL
     }
 
     // Log the updated form data to check if image paths are assigned correctly
